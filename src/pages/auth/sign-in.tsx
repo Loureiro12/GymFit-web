@@ -1,9 +1,36 @@
+import { Helmet } from 'react-helmet-async'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { toast } from 'sonner'
+import { zodResolver } from '@hookform/resolvers/zod'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Helmet } from 'react-helmet-async'
+
+const signInForm = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+})
+
+type SingInForm = z.infer<typeof signInForm>
 
 export function SignIn() {
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<SingInForm>({
+    resolver: zodResolver(signInForm),
+  })
+
+  async function handleSignIn(data: SingInForm) {
+    console.log(data)
+
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    toast.success('Login realizado com sucesso!')
+  }
   return (
     <>
       <Helmet title="Login" />
@@ -18,18 +45,18 @@ export function SignIn() {
             </p>
           </div>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit(handleSignIn)}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" />
+              <Input id="email" type="email" {...register('email')} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" />
+              <Input id="password" type="password" {...register('password')} />
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               Entrar
             </Button>
           </form>
