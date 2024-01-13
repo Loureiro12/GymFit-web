@@ -2,7 +2,14 @@ import { useState } from 'react'
 
 import { Outlet } from 'react-router-dom'
 import { Menu, MenuItem, Sidebar } from 'react-pro-sidebar'
-import { Bell, Dumbbell, LogOut, UtensilsCrossed } from 'lucide-react'
+import {
+  Bell,
+  Dumbbell,
+  LogOut,
+  UtensilsCrossed,
+  Menu as MenuIcon,
+  ChevronsLeft,
+} from 'lucide-react'
 
 import Logo from '../../assets/logo_full_h.svg'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -17,18 +24,9 @@ export function AppLayout() {
         collapsed={collapsed}
         transitionDuration={1000}
       >
-        <div className="flex items-center justify-center p-4 shadow-sm">
-          <img
-            src={Logo}
-            alt="Logo do GymFir"
-            className="h-8"
-            onClick={() => setCollapsed(!collapsed)}
-          />
-        </div>
         <Menu
           menuItemStyles={{
             button: ({ level, disabled }) => {
-              // only apply styles on first level elements of the tree
               if (level === 0)
                 return {
                   color: disabled ? '#7B6F72' : '#1D1617',
@@ -38,6 +36,24 @@ export function AppLayout() {
             },
           }}
         >
+          {collapsed ? (
+            <MenuItem
+              icon={<MenuIcon />}
+              onClick={() => setCollapsed(!collapsed)}
+            ></MenuItem>
+          ) : (
+            <MenuItem
+              suffix={<ChevronsLeft />}
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              <img
+                src={Logo}
+                alt="Logo do GymFir"
+                className="h-8"
+                onClick={() => setCollapsed(!collapsed)}
+              />
+            </MenuItem>
+          )}
           <MenuItem icon={<UtensilsCrossed size={16} />}>Exercício</MenuItem>
           <MenuItem icon={<Dumbbell size={16} />}>Alimento</MenuItem>
         </Menu>
@@ -52,7 +68,7 @@ export function AppLayout() {
       </Sidebar>
 
       <div className="flex w-full flex-col">
-        <header className="flex items-center justify-between bg-['#F7F8F8'] p-6 shadow-sm">
+        <header className="flex items-center justify-between bg-['#F7F8F8'] p-6 shadow-md">
           <div>
             <p className="hidden text-base font-medium md:block">Olá, André</p>
             <p className="hidden text-xs md:block">
