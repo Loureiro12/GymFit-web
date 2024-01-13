@@ -2,9 +2,11 @@ import { useState } from 'react'
 
 import { Outlet } from 'react-router-dom'
 import { Menu, MenuItem, Sidebar } from 'react-pro-sidebar'
-import { Dumbbell, LogOut, UtensilsCrossed } from 'lucide-react'
+import { Bell, Dumbbell, LogOut, UtensilsCrossed } from 'lucide-react'
 
 import Logo from '../../assets/logo_full_h.svg'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
@@ -50,9 +52,23 @@ export function AppLayout() {
       </Sidebar>
 
       <div className="flex w-full flex-col">
-        <header className="flex justify-between bg-slate-500 p-8">
-          <p>header</p>
-          <p>header</p>
+        <header className="flex items-center justify-between bg-['#F7F8F8'] p-6 shadow-sm">
+          <div>
+            <p className="hidden text-base font-medium md:block">Olá, André</p>
+            <p className="hidden text-xs md:block">
+              Hoje é Domingo, 12 de Janeiro 2022
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="icon">
+              <Bell size={16} />
+            </Button>
+
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          </div>
         </header>
         <Outlet />
       </div>
