@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 
+import { cn } from '@/lib/utils'
+
 import { ArrowUpDown, Pencil, Trash2 } from 'lucide-react'
 import {
   ColumnDef,
@@ -28,6 +30,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DeleteModal } from '@/components/DeleteModal'
+import { DrawerDialog } from '@/components/DrawerDialog'
+import { Label } from '@/components/ui/label'
+import { Select } from '@/components/Select'
 
 type Payment = {
   id: string
@@ -61,12 +66,81 @@ const data: Payment[] = [
   },
 ]
 
+const exercisesData = [
+  {
+    value: 'thorax',
+    label: 'Tórax',
+  },
+  {
+    value: 'shoulder',
+    label: 'Ombro',
+  },
+  {
+    value: 'triceps',
+    label: 'Tríceps',
+  },
+  {
+    value: 'back',
+    label: 'Costas',
+  },
+  {
+    value: 'abdomen',
+    label: 'Abdômen',
+  },
+  {
+    value: 'biceps',
+    label: 'Bíceps',
+  },
+  {
+    value: 'leg',
+    label: 'Pena',
+  },
+  {
+    value: 'glute',
+    label: 'Glúteo',
+  },
+]
+
 export function ExerciseHome() {
+  const [openSelect, setOpenSelect] = useState(false)
+  const [valueSelect, setValueSelect] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [openModal, setOpenModal] = useState(false)
+  const [openEditExercise, setOpenEditExercise] = useState(false)
+
+  function EditExerciseForm({ className }: React.ComponentProps<'form'>) {
+    return (
+      <form className={cn('grid items-start gap-4', className)}>
+        <div className="grid gap-2">
+          <Label htmlFor="name">Nome do exercício</Label>
+          <Input id="name" placeholder="Nome do exercício" />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="name">Grupo Muscular</Label>
+          <Select
+            data={exercisesData}
+            open={openSelect}
+            placeholder="Selecione o grupo muscular"
+            setOpen={setOpenSelect}
+            setValue={setValueSelect}
+            value={valueSelect}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="videoUrl">URL do vídeo</Label>
+          <Input id="videoUrl" type="url" placeholder="Url do vídeo" />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="imageUrl">URL da imagem</Label>
+          <Input id="imageUrl" type="url" placeholder="Url da imagem" />
+        </div>
+        <Button type="submit">Salvar alteração</Button>
+      </form>
+    )
+  }
 
   const columns: ColumnDef<Payment>[] = [
     {
@@ -120,7 +194,11 @@ export function ExerciseHome() {
       header: 'Ação',
       cell: () => (
         <div className="flex gap-2">
-          <Button variant="default" size="icon">
+          <Button
+            variant="default"
+            size="icon"
+            onClick={() => setOpenEditExercise(true)}
+          >
             <Pencil size={14} />
           </Button>
           <Button
@@ -268,6 +346,15 @@ export function ExerciseHome() {
         openModal={openModal}
         closeModal={() => setOpenModal(false)}
       />
+      <DrawerDialog
+        title="Editar exercício"
+        description="Edite o exercício de um jeito simples e rápido."
+        titleButtonCancel="Cancelar"
+        open={openEditExercise}
+        setOpen={setOpenEditExercise}
+      >
+        <EditExerciseForm />
+      </DrawerDialog>
     </>
   )
 }
