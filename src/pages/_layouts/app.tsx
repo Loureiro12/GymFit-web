@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Outlet } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
 import { Menu, MenuItem, Sidebar } from 'react-pro-sidebar'
 import {
   Bell,
@@ -54,7 +54,13 @@ export function AppLayout() {
               />
             </MenuItem>
           )}
-          <MenuItem icon={<UtensilsCrossed size={16} />}>Exercício</MenuItem>
+          <MenuItem
+            icon={<UtensilsCrossed size={16} />}
+            active={window.location.pathname === '/exercise'}
+            className="bg-secondary"
+          >
+            <Link to="/exercise">Exercício</Link>
+          </MenuItem>
           <MenuItem icon={<Dumbbell size={16} />}>Alimento</MenuItem>
         </Menu>
 
