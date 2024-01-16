@@ -57,11 +57,21 @@ export function AppLayout() {
           <MenuItem
             icon={<UtensilsCrossed size={16} />}
             active={window.location.pathname === '/exercise'}
-            className="bg-secondary"
+            className={
+              window.location.pathname === '/exercise' ? 'bg-secondary' : ''
+            }
           >
             <Link to="/exercise">Exercício</Link>
           </MenuItem>
-          <MenuItem icon={<Dumbbell size={16} />}>Alimento</MenuItem>
+          <MenuItem
+            icon={<Dumbbell size={16} />}
+            active={window.location.pathname === '/food'}
+            className={
+              window.location.pathname === '/food' ? 'bg-secondary' : ''
+            }
+          >
+            <Link to="/food">Alimento</Link>
+          </MenuItem>
         </Menu>
 
         <div
