@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 
 import { cn } from '@/lib/utils'
@@ -32,6 +32,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DeleteModal } from '@/components/DeleteModal'
 import { DrawerDialog } from '@/components/DrawerDialog'
 import { Label } from '@/components/ui/label'
+import api from '@/services/api'
+import { toast } from 'sonner'
 
 type Food = {
   id: string
@@ -44,29 +46,6 @@ type Food = {
   protein: string
 }
 
-const data: Food[] = [
-  {
-    id: 'm5gr84i9',
-    name: 'Feijão carioca cozido',
-    calories: '7600',
-    carbohydrates: '1360',
-    fat: '050',
-    fiber: '850',
-    portion: '100',
-    protein: '480',
-  },
-  {
-    id: 'f82ade8f-8796-4a21-abfc-9ea57822830f',
-    name: 'arroz branco cozido',
-    portion: '100',
-    calories: '12800',
-    carbohydrates: '2650',
-    protein: '250',
-    fat: '020',
-    fiber: '160',
-  },
-]
-
 export function FoodHome() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -74,6 +53,22 @@ export function FoodHome() {
   const [rowSelection, setRowSelection] = useState({})
   const [openModal, setOpenModal] = useState(false)
   const [openEditFood, setOpenEditFood] = useState(false)
+  const [food, setFood] = useState<Food[]>([])
+
+  const fetchExercise = async () => {
+    try {
+      const response = await api.get('food')
+      setFood(response.data.foods)
+    } catch (error) {
+      toast.error(
+        'Ocorreu um erro para carregar os alimentos, tente novamente mais tarde!',
+      )
+    }
+  }
+
+  useEffect(() => {
+    fetchExercise()
+  }, [])
 
   function EditExerciseForm({ className }: React.ComponentProps<'form'>) {
     return (
@@ -212,7 +207,7 @@ export function FoodHome() {
   ]
 
   const table = useReactTable({
-    data,
+    data: food,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
