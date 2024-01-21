@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Outlet, Link, Navigate } from 'react-router-dom'
+import { Outlet, Link, Navigate, useNavigate } from 'react-router-dom'
 import { Menu, MenuItem, Sidebar } from 'react-pro-sidebar'
 import {
   Bell,
@@ -16,9 +16,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 
 export function AppLayout() {
+  const navigate = useNavigate()
+
   const [collapsed, setCollapsed] = useState(false)
   const token = localStorage.getItem('token')
   const refreshToken = localStorage.getItem('refreshToken')
+
+  const handleLogOut = () => {
+    localStorage.setItem('token', '')
+    localStorage.setItem('refreshToken', '')
+
+    navigate('/sign-in')
+  }
 
   if (token && refreshToken) {
     return (
@@ -78,13 +87,14 @@ export function AppLayout() {
             </MenuItem>
           </Menu>
 
-          <div
-            className="flex items-center justify-center gap-2 p-4 shadow-sm"
+          <button
+            className="flex w-full items-center justify-center gap-2 p-4 shadow-sm"
             style={{ boxShadow: '0px -1px 1px rgba(0, 0, 0, 0.1)' }}
+            onClick={handleLogOut}
           >
             <LogOut size={16} />
             <p className="c text-sm font-normal">Sair</p>
-          </div>
+          </button>
         </Sidebar>
 
         <div className="flex w-full flex-col">
