@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import api from '@/services/api'
 
 const signInForm = z.object({
   email: z.string().email(),
@@ -27,10 +28,19 @@ export function SignIn() {
   async function handleSignIn(data: SingInForm) {
     console.log(data)
 
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      const response = await api.post('sessions', data)
+      const { token, refreshToken } = response.data
 
-    toast.success('Login realizado com sucesso!')
+      localStorage.setItem('token', token)
+      localStorage.setItem('refreshToken', refreshToken)
+
+      toast.success('Login realizado com sucesso!')
+    } catch (error) {
+      toast.error('Email ou senha incorreto!')
+    }
   }
+
   return (
     <>
       <Helmet title="Login" />
