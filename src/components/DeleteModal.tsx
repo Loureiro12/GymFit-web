@@ -16,6 +16,7 @@ interface DeleteModalProps {
   titleButtonConfirm: string
   openModal: boolean
   closeModal: () => void
+  onClickActionButton: any
 }
 
 export function DeleteModal({
@@ -25,6 +26,7 @@ export function DeleteModal({
   titleButtonDelete,
   openModal,
   closeModal,
+  onClickActionButton,
 }: DeleteModalProps) {
   return (
     <AlertDialog open={openModal}>
@@ -37,7 +39,9 @@ export function DeleteModal({
           <AlertDialogCancel onClick={closeModal}>
             {titleButtonDelete}
           </AlertDialogCancel>
-          <AlertDialogAction>{titleButtonConfirm}</AlertDialogAction>
+          <AlertDialogAction onClick={onClickActionButton}>
+            {titleButtonConfirm}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

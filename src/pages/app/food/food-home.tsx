@@ -56,8 +56,9 @@ export function FoodHome() {
   const [openEditFood, setOpenEditFood] = useState(false)
   const [food, setFood] = useState<Food[]>([])
   const [loadingFetchFood, setLoadingFetchFood] = useState(false)
+  const [selectedFood, setSelectedFood] = useState('')
 
-  const fetchExercise = async () => {
+  const fetchFood = async () => {
     try {
       setLoadingFetchFood(true)
       const response = await api.get('food')
@@ -71,8 +72,25 @@ export function FoodHome() {
     }
   }
 
+  const deleteFood = async () => {
+    try {
+      await api.delete(`food?foodId=${selectedFood}`)
+      setOpenModal(false)
+      fetchFood()
+    } catch (error) {
+      toast.error(
+        'Ocorreu um erro para deletar alimentos, tente novamente mais tarde!',
+      )
+    }
+  }
+
+  const openModalDeleteFood = (foodId: string) => {
+    setOpenModal(true)
+    setSelectedFood(foodId)
+  }
+
   useEffect(() => {
-    fetchExercise()
+    fetchFood()
   }, [])
 
   function EditExerciseForm({ className }: React.ComponentProps<'form'>) {
@@ -188,9 +206,9 @@ export function FoodHome() {
       ),
     },
     {
-      accessorKey: 'action',
+      accessorKey: 'id',
       header: 'Ação',
-      cell: () => (
+      cell: ({ row }) => (
         <div className="flex gap-2">
           <Button
             variant="default"
@@ -202,7 +220,7 @@ export function FoodHome() {
           <Button
             variant="destructive"
             size="icon"
-            onClick={() => setOpenModal(true)}
+            onClick={() => openModalDeleteFood(row.getValue('id'))}
           >
             <Trash2 size={14} />
           </Button>
@@ -351,6 +369,7 @@ export function FoodHome() {
         titleButtonDelete="Cancelar"
         openModal={openModal}
         closeModal={() => setOpenModal(false)}
+        onClickActionButton={deleteFood}
       />
       <DrawerDialog
         title="Editar alimento"
