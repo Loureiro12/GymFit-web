@@ -218,7 +218,7 @@ export function FoodHome() {
       <div className="p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold">Alimento</h1>
-          <Button>Adicionar</Button>
+          <Button onClick={() => navigate('/food/create')}>Adicionar</Button>
         </div>
 
         {loadingFetchFood ? (
