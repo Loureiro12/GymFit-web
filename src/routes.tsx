@@ -10,6 +10,8 @@ import { ExerciseHome } from './pages/app/exercise/exercise-home'
 import { FoodHome } from './pages/app/food/food-home'
 import { FoodEdit } from './pages/app/food/food-edit'
 import { FoodCreate } from './pages/app/food/food-create'
+import { ExerciseEdit } from './pages/app/exercise/exercise-edit'
+import { ExerciseCreate } from './pages/app/exercise/exercise-create'
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +31,26 @@ export const router = createBrowserRouter([
       {
         path: '/exercise',
         element: <ExerciseHome />,
+      },
+    ],
+  },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [
+      {
+        path: '/exercise/:id',
+        element: <ExerciseEdit />,
+      },
+    ],
+  },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [
+      {
+        path: '/exercise/create',
+        element: <ExerciseCreate />,
       },
     ],
   },

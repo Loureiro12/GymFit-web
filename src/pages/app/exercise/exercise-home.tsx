@@ -1,7 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
-
-import { cn } from '@/lib/utils'
 
 import { ArrowUpDown, Pencil, Trash2 } from 'lucide-react'
 import {
@@ -30,11 +28,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DeleteModal } from '@/components/DeleteModal'
-import { DrawerDialog } from '@/components/DrawerDialog'
-import { Label } from '@/components/ui/label'
-import { Select } from '@/components/Select'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import api from '@/services/api'
+import { Loading } from '@/components/Loading'
 
-type Payment = {
+type Exercise = {
   id: string
   name: string
   muscleGroup:
@@ -48,101 +47,86 @@ type Payment = {
     | 'glute'
 }
 
-const data: Payment[] = [
-  {
-    id: 'm5gr84i9',
-    name: 'Supino Inclinado',
-    muscleGroup: 'thorax',
-  },
-  {
-    id: '3u1reuv4',
-    name: 'Rosca bíceps',
-    muscleGroup: 'biceps',
-  },
-  {
-    id: 'derv1ws0',
-    name: 'Extensão de tríceps',
-    muscleGroup: 'triceps',
-  },
-]
-
-const exercisesData = [
-  {
-    value: 'thorax',
-    label: 'Tórax',
-  },
-  {
-    value: 'shoulder',
-    label: 'Ombro',
-  },
-  {
-    value: 'triceps',
-    label: 'Tríceps',
-  },
-  {
-    value: 'back',
-    label: 'Costas',
-  },
-  {
-    value: 'abdomen',
-    label: 'Abdômen',
-  },
-  {
-    value: 'biceps',
-    label: 'Bíceps',
-  },
-  {
-    value: 'leg',
-    label: 'Pena',
-  },
-  {
-    value: 'glute',
-    label: 'Glúteo',
-  },
-]
+interface ApiResponse {
+  data: {
+    exercises: Exercise[]
+  }
+}
 
 export function ExerciseHome() {
-  const [openSelect, setOpenSelect] = useState(false)
-  const [valueSelect, setValueSelect] = useState('')
+  const navigate = useNavigate()
+
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [openModal, setOpenModal] = useState(false)
-  const [openEditExercise, setOpenEditExercise] = useState(false)
+  const [exercise, setExercise] = useState<Exercise[]>([])
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null,
+  )
+  const [page, setPage] = useState(1)
+  const [disableButtonNext, setDisableButtonNext] = useState(false)
+  const [loadingFetchExercise, setLoadingFetchExercise] = useState(false)
 
-  function EditExerciseForm({ className }: React.ComponentProps<'form'>) {
-    return (
-      <form className={cn('grid items-start gap-4', className)}>
-        <div className="grid gap-2">
-          <Label htmlFor="name">Nome do exercício</Label>
-          <Input id="name" placeholder="Nome do exercício" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="name">Grupo Muscular</Label>
-          <Select
-            data={exercisesData}
-            open={openSelect}
-            placeholder="Selecione o grupo muscular"
-            setOpen={setOpenSelect}
-            setValue={setValueSelect}
-            value={valueSelect}
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="videoUrl">URL do vídeo</Label>
-          <Input id="videoUrl" type="url" placeholder="Url do vídeo" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="imageUrl">URL da imagem</Label>
-          <Input id="imageUrl" type="url" placeholder="Url da imagem" />
-        </div>
-        <Button type="submit">Salvar alteração</Button>
-      </form>
-    )
+  const fetchExercise = async () => {
+    try {
+      setLoadingFetchExercise(true)
+      const response: ApiResponse = await api.get(`exercise?page=${page}`)
+
+      if (response.data.exercises.length > 0) {
+        setExercise(response.data.exercises)
+        setDisableButtonNext(false)
+      }
+
+      if (response.data.exercises.length === 0) {
+        setDisableButtonNext(true)
+      }
+    } catch (error) {
+      toast.error(
+        'Ocorreu um erro para carregar os exercícios, tente novamente mais tarde!',
+      )
+    } finally {
+      setLoadingFetchExercise(false)
+    }
   }
 
-  const columns: ColumnDef<Payment>[] = [
+  const handleNextPage = () => {
+    console.log('handleNextPage')
+    setPage(page + 1)
+  }
+
+  const handleAfterPage = () => {
+    if (page === 1) {
+      setPage(1)
+    }
+    setPage(page - 1)
+  }
+
+  const deleteExercise = async () => {
+    try {
+      await api.delete(`exercise?exerciseId=${selectedExercise?.id}`)
+      toast.success('Exercício deletado com sucesso!')
+      setOpenModal(false)
+      fetchExercise()
+    } catch (error) {
+      toast.error(
+        'Ocorreu um erro para deletar o exercício, tente novamente mais tarde!',
+      )
+    }
+  }
+
+  const openModalDeleteExercise = (exerciseId: string) => {
+    setOpenModal(true)
+    const filterExercise = exercise.filter((item) => item.id === exerciseId)
+    setSelectedExercise(filterExercise[0])
+  }
+
+  useEffect(() => {
+    fetchExercise()
+  }, [page])
+
+  const columns: ColumnDef<Exercise>[] = [
     {
       id: 'select',
       header: ({ table }) => (
@@ -190,21 +174,21 @@ export function ExerciseHome() {
       ),
     },
     {
-      accessorKey: 'action',
+      accessorKey: 'id',
       header: 'Ação',
-      cell: () => (
+      cell: ({ row }) => (
         <div className="flex gap-2">
           <Button
             variant="default"
             size="icon"
-            onClick={() => setOpenEditExercise(true)}
+            onClick={() => navigate(`/exercise/${row.getValue('id')}`)}
           >
             <Pencil size={14} />
           </Button>
           <Button
             variant="destructive"
             size="icon"
-            onClick={() => setOpenModal(true)}
+            onClick={() => openModalDeleteExercise(row.getValue('id'))}
           >
             <Trash2 size={14} />
           </Button>
@@ -214,7 +198,7 @@ export function ExerciseHome() {
   ]
 
   const table = useReactTable({
-    data,
+    data: exercise,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -238,7 +222,9 @@ export function ExerciseHome() {
       <div className="p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold">Exercício</h1>
-          <Button>Adicionar</Button>
+          <Button onClick={() => navigate('/exercise/create')}>
+            Adicionar
+          </Button>
         </div>
         <div className="w-full">
           <div className="flex items-center py-4">
@@ -283,7 +269,11 @@ export function ExerciseHome() {
                 ))}
               </TableHeader>
               <TableBody>
-                {table.getRowModel().rows?.length ? (
+                {loadingFetchExercise ? (
+                  <div className="m-3 ">
+                    <Loading />
+                  </div>
+                ) : table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
@@ -321,16 +311,16 @@ export function ExerciseHome() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
+                onClick={handleAfterPage}
+                disabled={page === 1}
               >
                 Anterior
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
+                onClick={handleNextPage}
+                disabled={disableButtonNext}
               >
                 Próximo
               </Button>
@@ -343,18 +333,10 @@ export function ExerciseHome() {
         description="Essa ação não pode ser desfeita. Isso excluirá permanentemente o exercício."
         titleButtonConfirm="Continuar"
         titleButtonDelete="Cancelar"
+        onClickActionButton={deleteExercise}
         openModal={openModal}
         closeModal={() => setOpenModal(false)}
       />
-      <DrawerDialog
-        title="Editar exercício"
-        description="Edite o exercício de um jeito simples e rápido."
-        titleButtonCancel="Cancelar"
-        open={openEditExercise}
-        setOpen={setOpenEditExercise}
-      >
-        <EditExerciseForm />
-      </DrawerDialog>
     </>
   )
 }

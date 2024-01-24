@@ -103,6 +103,7 @@ export function FoodHome() {
   const deleteFood = async () => {
     try {
       await api.delete(`food?foodId=${selectedFood?.id}`)
+      toast.success('Alimento deletado com sucesso!')
       setOpenModal(false)
       fetchFood()
     } catch (error) {
