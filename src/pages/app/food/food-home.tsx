@@ -155,7 +155,7 @@ export function FoodHome() {
     {
       accessorKey: 'calories',
       header: () => {
-        return <Label>Caloria</Label>
+        return <Label>Caloria (kcal)</Label>
       },
       cell: ({ row }) => (
         <div className="capitalize">{row.getValue('calories')}</div>
@@ -164,7 +164,7 @@ export function FoodHome() {
     {
       accessorKey: 'carbohydrates',
       header: () => {
-        return <Label>Carboidrato</Label>
+        return <Label>Carboidrato (g)</Label>
       },
       cell: ({ row }) => (
         <div className="capitalize">{row.getValue('carbohydrates')}</div>
@@ -173,7 +173,7 @@ export function FoodHome() {
     {
       accessorKey: 'fat',
       header: () => {
-        return <Label>Gordura</Label>
+        return <Label>Gordura (g)</Label>
       },
       cell: ({ row }) => (
         <div className="capitalize">{row.getValue('fat')}</div>
@@ -182,7 +182,7 @@ export function FoodHome() {
     {
       accessorKey: 'protein',
       header: () => {
-        return <Label>Proteína</Label>
+        return <Label>Proteína (g)</Label>
       },
       cell: ({ row }) => (
         <div className="capitalize">{row.getValue('protein')}</div>
@@ -191,7 +191,7 @@ export function FoodHome() {
     {
       accessorKey: 'fiber',
       header: () => {
-        return <Label>Fibra</Label>
+        return <Label>Fibra (g)</Label>
       },
       cell: ({ row }) => (
         <div className="capitalize">{row.getValue('fiber')}</div>

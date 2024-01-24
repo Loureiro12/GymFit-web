@@ -126,7 +126,7 @@ export function FoodEdit() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="portion">Porção</Label>
+                  <Label htmlFor="portion">Porção (g)</Label>
                   <Input
                     id="portion"
                     placeholder="Porção"
@@ -134,7 +134,7 @@ export function FoodEdit() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="calories">Calorias</Label>
+                  <Label htmlFor="calories">Calorias (kcal)</Label>
                   <Input
                     id="calories"
                     placeholder="Calorias"
@@ -142,7 +142,7 @@ export function FoodEdit() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="carbohydrates">Carboidrato</Label>
+                  <Label htmlFor="carbohydrates">Carboidrato (g)</Label>
                   <Input
                     id="carbohydrates"
                     placeholder="Quantidade de carboidrato"
@@ -150,7 +150,7 @@ export function FoodEdit() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="protein">Proteína</Label>
+                  <Label htmlFor="protein">Proteína (g)</Label>
                   <Input
                     id="protein"
                     placeholder="Quantidade de proteína"
@@ -158,7 +158,7 @@ export function FoodEdit() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="fat">Gordura</Label>
+                  <Label htmlFor="fat">Gordura (g)</Label>
                   <Input
                     id="fat"
                     placeholder="Quantidade de gordura"
@@ -166,7 +166,7 @@ export function FoodEdit() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="fiber">Fibra</Label>
+                  <Label htmlFor="fiber">Fibra (g)</Label>
                   <Input
                     id="fiber"
                     placeholder="Quantidade de fibra"
