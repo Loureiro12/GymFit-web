@@ -8,6 +8,7 @@ import { AuthLayout } from './pages/_layouts/auth'
 import { SignUp } from './pages/auth/sign-up'
 import { ExerciseHome } from './pages/app/exercise/exercise-home'
 import { FoodHome } from './pages/app/food/food-home'
+import { FoodEdit } from './pages/app/food/food-edit'
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +38,16 @@ export const router = createBrowserRouter([
       {
         path: '/food',
         element: <FoodHome />,
+      },
+    ],
+  },
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [
+      {
+        path: '/food/:id',
+        element: <FoodEdit />,
       },
     ],
   },

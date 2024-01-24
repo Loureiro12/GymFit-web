@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 
-import { cn } from '@/lib/utils'
-
 import { Pencil, Trash2 } from 'lucide-react'
 import {
   ColumnDef,
@@ -30,11 +28,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DeleteModal } from '@/components/DeleteModal'
-import { DrawerDialog } from '@/components/DrawerDialog'
+
 import { Label } from '@/components/ui/label'
 import api from '@/services/api'
 import { toast } from 'sonner'
 import { Loading } from '@/components/Loading'
+import { useNavigate } from 'react-router-dom'
 
 type Food = {
   id: string
@@ -48,15 +47,16 @@ type Food = {
 }
 
 export function FoodHome() {
+  const navigate = useNavigate()
+
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [openModal, setOpenModal] = useState(false)
-  const [openEditFood, setOpenEditFood] = useState(false)
   const [food, setFood] = useState<Food[]>([])
   const [loadingFetchFood, setLoadingFetchFood] = useState(false)
-  const [selectedFood, setSelectedFood] = useState('')
+  const [selectedFood, setSelectedFood] = useState<Food | null>(null)
 
   const fetchFood = async () => {
     try {
@@ -74,7 +74,7 @@ export function FoodHome() {
 
   const deleteFood = async () => {
     try {
-      await api.delete(`food?foodId=${selectedFood}`)
+      await api.delete(`food?foodId=${selectedFood?.id}`)
       setOpenModal(false)
       fetchFood()
     } catch (error) {
@@ -86,49 +86,13 @@ export function FoodHome() {
 
   const openModalDeleteFood = (foodId: string) => {
     setOpenModal(true)
-    setSelectedFood(foodId)
+    const filterFood = food.filter((item) => item.id === foodId)
+    setSelectedFood(filterFood[0])
   }
 
   useEffect(() => {
     fetchFood()
   }, [])
-
-  function EditExerciseForm({ className }: React.ComponentProps<'form'>) {
-    return (
-      <form className={cn('grid items-start gap-4', className)}>
-        <div className="grid gap-2">
-          <Label htmlFor="name">Nome do Alimento</Label>
-          <Input id="name" placeholder="Nome do alimento" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="portion">Porção</Label>
-          <Input id="portion" placeholder="Porção" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="calories">Calorias</Label>
-          <Input id="calories" placeholder="Calorias" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="carbohydrates">Carboidrato</Label>
-          <Input id="carbohydrates" placeholder="Quantidade de carboidrato" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="protein">Proteína</Label>
-          <Input id="protein" placeholder="Quantidade de proteína" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="fat">Gordura</Label>
-          <Input id="fat" placeholder="Quantidade de gordura" />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="fiber">Fibra</Label>
-          <Input id="fiber" placeholder="Quantidade de fibra" />
-        </div>
-
-        <Button type="submit">Salvar alteração</Button>
-      </form>
-    )
-  }
 
   const columns: ColumnDef<Food>[] = [
     {
@@ -213,7 +177,7 @@ export function FoodHome() {
           <Button
             variant="default"
             size="icon"
-            onClick={() => setOpenEditFood(true)}
+            onClick={() => navigate(`/food/${row.getValue('id')}`)}
           >
             <Pencil size={14} />
           </Button>
@@ -371,15 +335,6 @@ export function FoodHome() {
         closeModal={() => setOpenModal(false)}
         onClickActionButton={deleteFood}
       />
-      <DrawerDialog
-        title="Editar alimento"
-        description="Edite o alimento de um jeito simples e rápido."
-        titleButtonCancel="Cancelar"
-        open={openEditFood}
-        setOpen={setOpenEditFood}
-      >
-        <EditExerciseForm />
-      </DrawerDialog>
     </>
   )
 }
