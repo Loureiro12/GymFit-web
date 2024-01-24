@@ -46,6 +46,12 @@ type Food = {
   protein: string
 }
 
+interface ApiResponse {
+  data: {
+    foods: Food[]
+  }
+}
+
 export function FoodHome() {
   const navigate = useNavigate()
 
@@ -57,12 +63,22 @@ export function FoodHome() {
   const [food, setFood] = useState<Food[]>([])
   const [loadingFetchFood, setLoadingFetchFood] = useState(false)
   const [selectedFood, setSelectedFood] = useState<Food | null>(null)
+  const [page, setPage] = useState(1)
+  const [disableButtonNext, setDisableButtonNext] = useState(false)
 
   const fetchFood = async () => {
     try {
       setLoadingFetchFood(true)
-      const response = await api.get('food')
-      setFood(response.data.foods)
+      const response: ApiResponse = await api.get(`food?page=${page}`)
+
+      if (response.data.foods.length > 0) {
+        setFood(response.data.foods)
+        setDisableButtonNext(false)
+      }
+
+      if (response.data.foods.length === 0) {
+        setDisableButtonNext(true)
+      }
     } catch (error) {
       toast.error(
         'Ocorreu um erro para carregar os alimentos, tente novamente mais tarde!',
@@ -70,6 +86,18 @@ export function FoodHome() {
     } finally {
       setLoadingFetchFood(false)
     }
+  }
+
+  const handleNextPage = () => {
+    console.log('handleNextPage')
+    setPage(page + 1)
+  }
+
+  const handleAfterPage = () => {
+    if (page === 1) {
+      setPage(1)
+    }
+    setPage(page - 1)
   }
 
   const deleteFood = async () => {
@@ -92,7 +120,7 @@ export function FoodHome() {
 
   useEffect(() => {
     fetchFood()
-  }, [])
+  }, [page])
 
   const columns: ColumnDef<Food>[] = [
     {
@@ -221,110 +249,107 @@ export function FoodHome() {
           <Button onClick={() => navigate('/food/create')}>Adicionar</Button>
         </div>
 
-        {loadingFetchFood ? (
-          <div className="mt-4 content-center">
-            <Loading />
+        <div className="w-full">
+          <div className="flex items-center py-4">
+            <Input
+              placeholder="Filtrar por nome..."
+              value={
+                (table.getColumn('name')?.getFilterValue() as string) ?? ''
+              }
+              onChange={(event) =>
+                table.getColumn('name')?.setFilterValue(event.target.value)
+              }
+              className="max-w-sm"
+            />
+            {table.getFilteredSelectedRowModel().rows.length > 1 && (
+              <Button
+                variant="destructive"
+                className="ml-auto"
+                onClick={() => console.log('########')}
+              >
+                Excluir
+              </Button>
+            )}
           </div>
-        ) : (
-          <div className="w-full">
-            <div className="flex items-center py-4">
-              <Input
-                placeholder="Filtrar por nome..."
-                value={
-                  (table.getColumn('name')?.getFilterValue() as string) ?? ''
-                }
-                onChange={(event) =>
-                  table.getColumn('name')?.setFilterValue(event.target.value)
-                }
-                className="max-w-sm"
-              />
-              {table.getFilteredSelectedRowModel().rows.length > 1 && (
-                <Button
-                  variant="destructive"
-                  className="ml-auto"
-                  onClick={() => console.log('########')}
-                >
-                  Excluir
-                </Button>
-              )}
-            </div>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                        return (
-                          <TableHead key={header.id}>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext(),
-                                )}
-                          </TableHead>
-                        )
-                      })}
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {loadingFetchFood ? (
+                  <div className="m-3 ">
+                    <Loading />
+                  </div>
+                ) : table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && 'selected'}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody>
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        data-state={row.getIsSelected() && 'selected'}
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
-                        Nem um resultado encontrado.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      Nem um resultado encontrado.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex-1 text-sm text-muted-foreground">
+              {table.getFilteredSelectedRowModel().rows.length} de{' '}
+              {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-              <div className="flex-1 text-sm text-muted-foreground">
-                {table.getFilteredSelectedRowModel().rows.length} de{' '}
-                {table.getFilteredRowModel().rows.length} linha(s)
-                selecionada(s).
-              </div>
-              <div className="space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                >
-                  Próximo
-                </Button>
-              </div>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAfterPage}
+                disabled={page === 1}
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={disableButtonNext}
+              >
+                Próximo
+              </Button>
             </div>
           </div>
-        )}
+        </div>
       </div>
       <DeleteModal
         title="Tem certeza que deseja deletar esse alimento?"
