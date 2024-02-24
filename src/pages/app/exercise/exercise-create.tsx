@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/Select'
+import axios from 'axios'
 
 const exercisesData = [
   {
@@ -51,8 +52,8 @@ const exercisesData = [
 
 const exerciseForm = z.object({
   name: z.string().min(1),
-  imageUrl: z.string().min(1),
-  videoUrl: z.string().min(1),
+  // imageUrl: z.string().min(1),
+  // videoUrl: z.string().min(1),
 })
 
 type ExerciseForm = z.infer<typeof exerciseForm>
@@ -79,9 +80,19 @@ export function ExerciseCreate() {
         toast.error('Selecione o Grupo Muscular para continuar!')
       }
 
-      const dataSend = { ...data, muscleGroup: valueSelect }
+      const dataSend = {
+        name: data.name,
+        muscleGroup: valueSelect,
+        contentType: 'video/mp4',
+      }
 
-      await api.post('exercise', dataSend)
+      const response = await api.post('exercise', dataSend)
+
+      await axios.put(response.data.signedUrl, data.videoUrl, {
+        headers: {
+          'Content-Type': 'video/mp4',
+        },
+      })
 
       toast.success('Exercício criado com sucesso!')
       navigate('/exercise')
@@ -130,7 +141,7 @@ export function ExerciseCreate() {
               <Label htmlFor="videoUrl">URL do vídeo</Label>
               <Input
                 id="videoUrl"
-                type="url"
+                type="file"
                 placeholder="Url do vídeo"
                 {...register('videoUrl')}
               />
